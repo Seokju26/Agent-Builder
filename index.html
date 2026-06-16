@@ -85,7 +85,7 @@ body{background:#fff;color:#1a1a1a;font-family:'Apple SD Gothic Neo','Noto Sans 
 .canvas-empty-icon{font-size:40px;margin-bottom:10px;opacity:.5}
 .canvas-empty-text{font-size:13px;font-weight:500}
 .canvas-empty-sub{font-size:11px;margin-top:4px;opacity:.8}
-.io-panel{height:240px;flex-shrink:0;border-top:2px solid #e0e0e0;background:#f5f5f5;display:flex;flex-direction:column}
+.io-panel{height:260px;flex-shrink:0;border-top:2px solid #e0e0e0;background:#f5f5f5;display:flex;flex-direction:column}
 .io-header{padding:10px 20px 8px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #e0e0e0;flex-shrink:0}
 .io-title{font-size:11px;font-weight:700;color:#999;letter-spacing:.08em}
 .io-badge{font-size:12px;font-weight:600;padding:2px 10px;border-radius:12px;margin-left:4px;display:none}
@@ -93,16 +93,17 @@ body{background:#fff;color:#1a1a1a;font-family:'Apple SD Gothic Neo','Noto Sans 
 .io-col{flex:1;padding:14px 20px;overflow-y:auto}
 .io-col+.io-col{border-left:1px solid #e0e0e0}
 .io-col-title{font-size:11px;font-weight:700;color:#999;letter-spacing:.08em;margin-bottom:10px}
-.io-field{margin-bottom:12px}
+.io-field{margin-bottom:10px}
 .io-label{font-size:11px;font-weight:600;color:#555;margin-bottom:4px;display:block}
 .io-input,.io-select{width:100%;padding:6px 10px;background:#fff;border:1px solid #e0e0e0;border-radius:6px;font-size:12px;color:#1a1a1a;font-family:inherit;outline:none}
 .io-input:focus,.io-select:focus{border-color:#3d7a3d}
 .io-tag-wrap{display:flex;flex-wrap:wrap;gap:5px}
 .io-tag{padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid}
+.io-result{padding:6px 10px;background:#f0faf0;border:1px solid #b8dfc0;border-radius:6px;font-size:12px;color:#2a5a2a;font-weight:500;line-height:1.5}
 .io-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;color:#ccc;text-align:center;gap:8px}
 .io-empty-icon{font-size:28px;opacity:.5}
 .io-empty-text{font-size:12px}
-.conn-hint{position:fixed;bottom:260px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:8px 18px;border-radius:20px;font-size:12px;font-weight:600;z-index:100;display:none;pointer-events:none}
+.conn-hint{position:fixed;bottom:280px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:8px 18px;border-radius:20px;font-size:12px;font-weight:600;z-index:100;display:none;pointer-events:none}
 
 /* LIBRARY */
 .lib-hero{background:linear-gradient(135deg,#1e5c2e 0%,#2d8b47 40%,#3aaf5c 70%,#4ec96e 100%);padding:32px 40px 28px;position:relative;overflow:hidden}
@@ -285,7 +286,7 @@ body{background:#fff;color:#1a1a1a;font-family:'Apple SD Gothic Neo','Noto Sans 
   </div>
 </div>
 
-<!-- SAVE MODAL -->
+<!-- MODAL -->
 <div class="modal-overlay" id="save-modal">
   <div class="modal">
     <h3>📚 라이브러리에 저장</h3>
@@ -311,7 +312,7 @@ const COMP = {
   notify:   {label:'알림·보고',  icon:'🔔', bg:'#FDF0F5', border:'#d688a8', color:'#7a2048', bbg:'#f7d0e4', grad:'#c04878,#d688a8'}
 };
 
-// 기본 I/O 정의
+// 기본 I/O
 const IO = {
   extract:{i:[{l:'파일 소스',t:'sel',o:['Wrapsody 폴더 연결','로컬 업로드','외부 시스템 API']},{l:'지원 형식',t:'tags',o:['PDF','DOCX','PPTX','XLSX','이미지'],a:['PDF','DOCX']},{l:'추출 항목',t:'txt',p:'예: 계약일, 금액, 당사자, 만료일'}],o:[{l:'출력 형식',t:'sel',o:['JSON','CSV','구조화 텍스트']},{l:'전달 대상',t:'sel',o:['다음 컴포넌트','Wrapsody 저장','외부 API']},{l:'오류 처리',t:'sel',o:['건너뜀','담당자 알림','프로세스 중단']}]},
   classify:{i:[{l:'분류 기준',t:'sel',o:['AI 자동 분류','규칙 기반 분류','혼합 방식']},{l:'분류 카테고리',t:'txt',p:'예: 계약서, 보고서, 청구서, 기타'},{l:'신뢰도 임계값',t:'sel',o:['90% 이상','80% 이상','70% 이상','임계값 없음']}],o:[{l:'결과 포함 항목',t:'tags',o:['카테고리명','신뢰도','근거 텍스트'],a:['카테고리명','신뢰도']},{l:'미분류 처리',t:'sel',o:['담당자 검토 요청','기타로 분류','프로세스 중단']}]},
@@ -320,62 +321,78 @@ const IO = {
   notify:{i:[{l:'알림 조건',t:'txt',p:'예: 만료일 D-60, 금액 100만원 초과'},{l:'수신자',t:'txt',p:'예: 담당자, 팀장, 외부 이메일'},{l:'알림 채널',t:'tags',o:['이메일','Slack','Wrapsody 알림','SMS'],a:['이메일','Wrapsody 알림']}],o:[{l:'보고서 형식',t:'sel',o:['없음','PDF 요약','HTML 대시보드','Excel']},{l:'보고서 주기',t:'sel',o:['이벤트 발생 시','매일','매주','매월']}]}
 };
 
-// 재무제표 시나리오 전용 I/O
+// 재무제표 시나리오 템플릿 I/O
 const SCENARIO_IO = {
+  extract:{i:[{l:'파일 소스',t:'sel',o:['Wrapsody 저장소','로컬 업로드','외부 시스템 API'],v:'Wrapsody 저장소'},{l:'지원 형식',t:'tags',o:['PDF','XLSX','이미지','DOCX'],a:['PDF','XLSX','이미지']},{l:'처리 옵션',t:'tags',o:['표 구조 인식','OCR','텍스트 추출'],a:['표 구조 인식']},{l:'OCR 언어',t:'sel',o:['한국어','영어','한국어+영어'],v:'한국어'}],o:[{l:'출력 형식',t:'sel',o:['JSON','CSV','구조화 텍스트'],v:'JSON'},{l:'전달 대상',t:'sel',o:['다음 컴포넌트','Wrapsody 저장','외부 API'],v:'다음 컴포넌트'}]},
+  classify:{i:[{l:'분류 기준',t:'sel',o:['AI 자동 분류','규칙 기반 분류','혼합 방식'],v:'AI 자동 분류'},{l:'재무제표 유형',t:'tags',o:['손익계산서','대차대조표','현금흐름표'],a:['손익계산서','대차대조표','현금흐름표']},{l:'신뢰도 임계값',t:'sel',o:['90% 이상','80% 이상','70% 이상'],v:'90% 이상'}],o:[{l:'결과 포함 항목',t:'tags',o:['카테고리명','기준연도/분기','신뢰도','근거 텍스트'],a:['카테고리명','기준연도/분기']},{l:'미분류 처리',t:'sel',o:['담당자 검토 요청','기타로 분류','프로세스 중단'],v:'담당자 검토 요청'}]},
+  meta:{i:[{l:'소스 데이터',t:'sel',o:['이전 컴포넌트 출력','직접 입력','외부 API'],v:'이전 컴포넌트 출력'},{l:'추출 항목',t:'tags',o:['매출액','영업이익','당기순이익','부채비율','유동비율'],a:['매출액','영업이익','당기순이익','부채비율','유동비율']},{l:'기입 방식',t:'sel',o:['덮어쓰기','값이 없을 때만','추가(append)'],v:'덮어쓰기'}],o:[{l:'기입 대상',t:'sel',o:['Wrapsody 문서 속성','외부 DB','양쪽 모두'],v:'Wrapsody 문서 속성'},{l:'기입 결과 알림',t:'sel',o:['없음','Wrapsody 알림','이메일'],v:'Wrapsody 알림'}]},
+  workflow:{i:[{l:'LLM 선택',t:'sel',o:['ELLM (사내)','외부 LLM (GPT-4)','외부 LLM (Claude)'],v:'ELLM (사내)'},{l:'분석 지시',t:'txt',p:'',v:'전년 대비 증감, 재무 건전성, 주요 리스크 3줄 요약'},{l:'실행 조건',t:'sel',o:['모든 조건 충족','하나 이상 충족','조건 없음'],v:'모든 조건 충족'}],o:[{l:'출력 형식',t:'sel',o:['서술형 분석 텍스트','JSON','마크다운'],v:'서술형 분석 텍스트'},{l:'완료 액션',t:'sel',o:['다음 컴포넌트 실행','완료 폴더 이동','상태 업데이트'],v:'다음 컴포넌트 실행'}]},
+  notify:{i:[{l:'출력 형식',t:'tags',o:['PDF 리포트','Excel 데이터시트','HTML 대시보드'],a:['PDF 리포트','Excel 데이터시트']},{l:'저장 위치',t:'txt',p:'',v:'/재무분석/완료'},{l:'알림 채널',t:'tags',o:['이메일','Wrapsody 알림','Slack','SMS'],a:['이메일','Wrapsody 알림']}],o:[{l:'수신자',t:'txt',p:'',v:'담당자, CFO'},{l:'보고서 주기',t:'sel',o:['이벤트 발생 시','매일','매주','매월'],v:'이벤트 발생 시'}]}
+};
+
+// 파수AI 1Q2026 실제 분석 I/O (result 타입 = 실제 결과값 표시)
+const FASOO_IO = {
   extract:{
     i:[
-      {l:'파일 소스',t:'sel',o:['Wrapsody 저장소','로컬 업로드','외부 시스템 API'],v:'Wrapsody 저장소'},
-      {l:'지원 형식',t:'tags',o:['PDF','XLSX','이미지','DOCX'],a:['PDF','XLSX','이미지']},
-      {l:'처리 옵션',t:'tags',o:['표 구조 인식','OCR','텍스트 추출'],a:['표 구조 인식']},
-      {l:'OCR 언어',t:'sel',o:['한국어','영어','한국어+영어'],v:'한국어'}
+      {l:'파일 소스',t:'sel',o:['Wrapsody 저장소','로컬 업로드'],v:'Wrapsody 저장소'},
+      {l:'대상 파일',t:'txt',p:'',v:'파수AI_분기보고서_2026_05_14.pdf (202p)'},
+      {l:'추출 범위',t:'txt',p:'',v:'p.34 ~ p.40 (III. 재무에 관한 사항)'},
+      {l:'처리 옵션',t:'tags',o:['표 구조 인식','OCR','텍스트 추출'],a:['표 구조 인식']}
     ],
     o:[
-      {l:'출력 형식',t:'sel',o:['JSON','CSV','구조화 텍스트'],v:'JSON'},
-      {l:'전달 대상',t:'sel',o:['다음 컴포넌트','Wrapsody 저장','외부 API'],v:'다음 컴포넌트'}
+      {l:'추출 재무제표',t:'tags',o:['연결 재무상태표','연결 포괄손익계산서','연결 현금흐름표'],a:['연결 재무상태표','연결 포괄손익계산서','연결 현금흐름표']},
+      {l:'처리 결과',t:'result',v:'✅ 3개 재무제표 추출 완료 (202p 중 7p 처리)'},
+      {l:'출력 형식',t:'sel',o:['JSON','CSV','구조화 텍스트'],v:'JSON'}
     ]
   },
   classify:{
     i:[
-      {l:'분류 기준',t:'sel',o:['AI 자동 분류','규칙 기반 분류','혼합 방식'],v:'AI 자동 분류'},
-      {l:'재무제표 유형',t:'tags',o:['손익계산서','대차대조표','현금흐름표'],a:['손익계산서','대차대조표','현금흐름표']},
-      {l:'신뢰도 임계값',t:'sel',o:['90% 이상','80% 이상','70% 이상'],v:'90% 이상'}
+      {l:'분류 기준',t:'sel',o:['AI 자동 분류','규칙 기반'],v:'AI 자동 분류'},
+      {l:'재무제표 유형',t:'tags',o:['재무상태표','포괄손익계산서','현금흐름표'],a:['재무상태표','포괄손익계산서','현금흐름표']},
+      {l:'신뢰도 임계값',t:'sel',o:['90% 이상','80% 이상'],v:'90% 이상'}
     ],
     o:[
-      {l:'결과 포함 항목',t:'tags',o:['카테고리명','기준연도/분기','신뢰도','근거 텍스트'],a:['카테고리명','기준연도/분기']},
-      {l:'미분류 처리',t:'sel',o:['담당자 검토 요청','기타로 분류','프로세스 중단'],v:'담당자 검토 요청'}
+      {l:'분류 결과',t:'result',v:'✅ 연결 재무상태표 / 연결 포괄손익계산서 / 연결 현금흐름표 — 3종 확인'},
+      {l:'기준 연도·분기',t:'result',v:'제27기 1분기 (2026.01.01 ~ 2026.03.31)'},
+      {l:'비교 기준',t:'result',v:'전년 동기: 제26기 1분기 (2025.01.01 ~ 2025.03.31)'}
     ]
   },
   meta:{
     i:[
-      {l:'소스 데이터',t:'sel',o:['이전 컴포넌트 출력','직접 입력','외부 API'],v:'이전 컴포넌트 출력'},
+      {l:'소스 데이터',t:'sel',o:['이전 컴포넌트 출력'],v:'이전 컴포넌트 출력'},
       {l:'추출 항목',t:'tags',o:['매출액','영업이익','당기순이익','부채비율','유동비율'],a:['매출액','영업이익','당기순이익','부채비율','유동비율']},
-      {l:'기입 방식',t:'sel',o:['덮어쓰기','값이 없을 때만','추가(append)'],v:'덮어쓰기'}
+      {l:'기입 대상',t:'sel',o:['Wrapsody 문서 속성','외부 DB'],v:'Wrapsody 문서 속성'}
     ],
     o:[
-      {l:'기입 대상',t:'sel',o:['Wrapsody 문서 속성','외부 DB','양쪽 모두'],v:'Wrapsody 문서 속성'},
-      {l:'기입 결과 알림',t:'sel',o:['없음','Wrapsody 알림','이메일'],v:'Wrapsody 알림'}
+      {l:'매출액',t:'result',v:'9,004,889,928원 (약 90.0억) · 전년 동기比 +6.8%'},
+      {l:'영업이익',t:'result',v:'△2,017,098,184원 (영업손실 약 △20.2억) · 전년比 손실 폭 축소'},
+      {l:'당기순이익',t:'result',v:'△1,871,614,131원 (순손실 약 △18.7억)'},
+      {l:'부채비율',t:'result',v:'28.8% (부채총계 101억 ÷ 자본총계 351억) — 안정적'},
+      {l:'유동비율',t:'result',v:'293.7% (유동자산 188억 ÷ 유동부채 64억) — 양호'}
     ]
   },
   workflow:{
     i:[
       {l:'LLM 선택',t:'sel',o:['ELLM (사내)','외부 LLM (GPT-4)','외부 LLM (Claude)'],v:'ELLM (사내)'},
-      {l:'분석 지시',t:'txt',p:'분석 지시 입력',v:'전년 대비 증감, 재무 건전성, 주요 리스크 3줄 요약'},
-      {l:'실행 조건',t:'sel',o:['모든 조건 충족','하나 이상 충족','조건 없음'],v:'모든 조건 충족'}
+      {l:'분석 지시',t:'txt',p:'',v:'전년 대비 증감, 재무 건전성, 주요 리스크 3줄 요약'},
+      {l:'비교 기준',t:'sel',o:['전년 동기 대비','전분기 대비','전년도 대비'],v:'전년 동기 대비'}
     ],
     o:[
-      {l:'출력 형식',t:'sel',o:['서술형 분석 텍스트','JSON','마크다운'],v:'서술형 분석 텍스트'},
-      {l:'완료 액션',t:'sel',o:['다음 컴포넌트 실행','완료 폴더 이동','상태 업데이트'],v:'다음 컴포넌트 실행'}
+      {l:'분석 결과 ①',t:'result',v:'매출 YoY +6.8% 성장, 영업손실 폭 △27.1억 → △20.2억으로 축소'},
+      {l:'분석 결과 ②',t:'result',v:'부채비율 28.8% · 유동비율 293.7%로 단기 재무 건전성 양호'},
+      {l:'분석 결과 ③',t:'result',v:'영업적자 지속이나 영업현금흐름 흑자 전환(+15.7억)이 긍정적 신호'}
     ]
   },
   notify:{
     i:[
       {l:'출력 형식',t:'tags',o:['PDF 리포트','Excel 데이터시트','HTML 대시보드'],a:['PDF 리포트','Excel 데이터시트']},
-      {l:'저장 위치',t:'txt',p:'Wrapsody 폴더 경로',v:'/재무분석/완료'},
-      {l:'알림 채널',t:'tags',o:['이메일','Wrapsody 알림','Slack','SMS'],a:['이메일','Wrapsody 알림']}
+      {l:'저장 위치',t:'txt',p:'',v:'/재무분석/2026_1Q/파수AI'},
+      {l:'알림 채널',t:'tags',o:['이메일','Wrapsody 알림','Slack'],a:['이메일','Wrapsody 알림']}
     ],
     o:[
-      {l:'수신자',t:'txt',p:'예: 담당자, CFO',v:'담당자, CFO'},
-      {l:'보고서 주기',t:'sel',o:['이벤트 발생 시','매일','매주','매월'],v:'이벤트 발생 시'}
+      {l:'수신자',t:'txt',p:'',v:'CFO, IR담당자'},
+      {l:'보고서명',t:'result',v:'파수AI_1Q2026_재무분석리포트.pdf'},
+      {l:'처리 상태',t:'result',v:'✅ /재무분석/2026_1Q/파수AI 저장 완료 · 담당자 알림 발송 완료'}
     ]
   }
 };
@@ -514,24 +531,28 @@ function renderIO(id) {
   }
   const node = nodes.find(n => n.id === id); if (!node) return;
   const c = COMP[node.type];
-  const def = node.scenario ? SCENARIO_IO[node.type] : IO[node.type];
+  let def;
+  if (node.scenario === 'fasoo') def = FASOO_IO[node.type];
+  else if (node.scenario === true) def = SCENARIO_IO[node.type];
+  else def = IO[node.type];
+
   badge.style.display = 'inline-block'; badge.style.background = c.bbg; badge.style.color = c.color;
   badge.textContent = c.icon + ' ' + c.label;
 
   function fld(f) {
+    const label = f.l ? `<label class="io-label">${f.l}</label>` : '';
     if (f.t === 'sel') {
       const opts = f.o.map(x => `<option${f.v && x === f.v ? ' selected' : ''}>${x}</option>`).join('');
-      return `<div class="io-field"><label class="io-label">${f.l}</label><select class="io-select">${opts}</select></div>`;
+      return `<div class="io-field">${label}<select class="io-select">${opts}</select></div>`;
     }
-    if (f.t === 'txt') {
-      return `<div class="io-field"><label class="io-label">${f.l}</label><input class="io-input" type="text" placeholder="${f.p||''}" value="${f.v||''}"></div>`;
-    }
+    if (f.t === 'txt') return `<div class="io-field">${label}<input class="io-input" type="text" placeholder="${f.p||''}" value="${f.v||''}"></div>`;
+    if (f.t === 'result') return `<div class="io-field">${label}<div class="io-result">${f.v}</div></div>`;
     if (f.t === 'tags') {
       const tags = f.o.map(o => {
         const on = (f.a||[]).includes(o);
         return `<span class="io-tag" style="background:${on?c.bbg:'#f8f8f8'};border-color:${on?c.border:'#e0e0e0'};color:${on?c.color:'#999'}" onclick="this.style.background='${c.bbg}';this.style.borderColor='${c.border}';this.style.color='${c.color}'">${o}</span>`;
       }).join('');
-      return `<div class="io-field"><label class="io-label">${f.l}</label><div class="io-tag-wrap">${tags}</div></div>`;
+      return `<div class="io-field">${label}<div class="io-tag-wrap">${tags}</div></div>`;
     }
     return '';
   }
@@ -546,7 +567,6 @@ document.getElementById('graph-canvas').addEventListener('click', e => {
   }
 });
 
-// ══ LOAD AGENT FROM LIBRARY ══
 function loadAgentInBuilder(id) {
   const lib = JSON.parse(localStorage.getItem('wab_library') || '[]');
   const saved = lib.find(a => a.id === id);
@@ -573,7 +593,7 @@ function loadAgentInBuilder(id) {
   }, 80);
 }
 
-// ══ SAVE TO LIBRARY ══
+// ══ SAVE ══
 function openSaveModal() {
   if (nodes.length === 0) { showToast('⚠️ 노드가 없습니다. 컴포넌트를 먼저 추가해주세요.'); return; }
   document.getElementById('m-name').value = document.getElementById('agent-name').value;
@@ -595,8 +615,7 @@ function saveToLibrary() {
     description: document.getElementById('m-desc').value.trim(),
     components: [...new Set(nodes.map(n => n.type))],
     nodes: nodes.map(n => ({id: n.id, type: n.type, x: n.x, y: n.y, scenario: n.scenario||false})),
-    connections: [...conns],
-    nodeCounter: nCount,
+    connections: [...conns], nodeCounter: nCount,
     createdAt: new Date().toLocaleDateString('ko-KR')
   };
   const lib = JSON.parse(localStorage.getItem('wab_library') || '[]');
@@ -651,45 +670,66 @@ function renderLibrary() {
   }).join('');
 }
 
-function openLibAgent(id) {
-  loadAgentInBuilder(id);
-  showView('builder');
-}
+function openLibAgent(id) { loadAgentInBuilder(id); showView('builder'); }
 
-// ══ TOAST ══
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-// ══ 재무제표 시나리오 사전 로드 ══
-function initSampleAgent() {
+// ══ 사전 로드 에이전트 ══
+function initSampleAgents() {
   const lib = JSON.parse(localStorage.getItem('wab_library') || '[]');
-  if (lib.find(a => a.id === 'sample_financial')) return;
   const today = new Date().toLocaleDateString('ko-KR');
-  const sample = {
-    id: 'sample_financial',
-    name: '재무제표 자동 분석 리포트',
-    category: '금융',
-    description: '재무제표 PDF를 Wrapsody에 올리면 유형 자동 분류 → 주요 지표 자동 추출 → ELLM 분석 → 리포트 저장까지 사람 개입 없이 자동으로 처리됩니다.',
-    components: ['extract', 'classify', 'meta', 'workflow', 'notify'],
-    nodes: [
-      {id:1, type:'extract',  x:60,  y:90, scenario:true},
-      {id:2, type:'classify', x:250, y:90, scenario:true},
-      {id:3, type:'meta',     x:440, y:90, scenario:true},
-      {id:4, type:'workflow', x:630, y:90, scenario:true},
-      {id:5, type:'notify',   x:820, y:90, scenario:true},
-    ],
-    connections: [{f:1,t:2},{f:2,t:3},{f:3,t:4},{f:4,t:5}],
-    nodeCounter: 5,
-    createdAt: today
-  };
-  lib.push(sample);
-  localStorage.setItem('wab_library', JSON.stringify(lib));
+  let changed = false;
+
+  // 1. 파수AI 1Q2026 실제 분석 (맨 앞)
+  if (!lib.find(a => a.id === 'sample_fasoo_1q2026')) {
+    lib.unshift({
+      id: 'sample_fasoo_1q2026',
+      name: '파수AI 1Q2026 재무 분석',
+      category: '금융',
+      description: '파수AI 제27기 1분기(2026.01~03) 분기보고서 실제 분석 결과. 매출 YoY +6.8%, 영업손실 폭 △27.1억→△20.2억 축소, 영업현금흐름 흑자 전환(+15.7억).',
+      components: ['extract','classify','meta','workflow','notify'],
+      nodes:[
+        {id:1,type:'extract', x:60, y:90,scenario:'fasoo'},
+        {id:2,type:'classify',x:250,y:90,scenario:'fasoo'},
+        {id:3,type:'meta',    x:440,y:90,scenario:'fasoo'},
+        {id:4,type:'workflow',x:630,y:90,scenario:'fasoo'},
+        {id:5,type:'notify',  x:820,y:90,scenario:'fasoo'},
+      ],
+      connections:[{f:1,t:2},{f:2,t:3},{f:3,t:4},{f:4,t:5}],
+      nodeCounter:5, createdAt:today
+    });
+    changed = true;
+  }
+
+  // 2. 재무제표 분석 템플릿 (뒤에)
+  if (!lib.find(a => a.id === 'sample_financial')) {
+    lib.push({
+      id: 'sample_financial',
+      name: '재무제표 자동 분석 리포트',
+      category: '금융',
+      description: '재무제표 PDF를 Wrapsody에 올리면 유형 자동 분류 → 주요 지표 자동 추출 → ELLM 분석 → 리포트 저장까지 사람 개입 없이 자동으로 처리됩니다.',
+      components: ['extract','classify','meta','workflow','notify'],
+      nodes:[
+        {id:1,type:'extract', x:60, y:90,scenario:true},
+        {id:2,type:'classify',x:250,y:90,scenario:true},
+        {id:3,type:'meta',    x:440,y:90,scenario:true},
+        {id:4,type:'workflow',x:630,y:90,scenario:true},
+        {id:5,type:'notify',  x:820,y:90,scenario:true},
+      ],
+      connections:[{f:1,t:2},{f:2,t:3},{f:3,t:4},{f:4,t:5}],
+      nodeCounter:5, createdAt:today
+    });
+    changed = true;
+  }
+
+  if (changed) localStorage.setItem('wab_library', JSON.stringify(lib));
 }
 
-initSampleAgent();
+initSampleAgents();
 </script>
 </body>
 </html>

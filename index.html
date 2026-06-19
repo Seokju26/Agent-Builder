@@ -73,6 +73,11 @@ body{background:#fff;color:#1a1a1a;font-family:'Apple SD Gothic Neo','Noto Sans 
 .node.selected{border-color:#3d7a3d;box-shadow:0 0 0 3px #3d7a3d25}
 .node.conn-source{border-color:#d4a84b;box-shadow:0 0 0 3px #d4a84b30}
 .node.conn-target:hover{border-color:#3d7a3d;background:#f0faf0}
+.node.node-running{border-color:#f97316;box-shadow:0 0 0 4px #f9731628;animation:nodeRun 1s ease-in-out infinite}
+@keyframes nodeRun{0%,100%{box-shadow:0 0 0 4px #f9731628}50%{box-shadow:0 0 0 7px #f9731645}}
+.run-btn{padding:7px 14px;background:#f97316;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;margin-right:8px}
+.run-btn:hover{background:#ea6c00}
+.run-btn:disabled{background:#ccc;cursor:not-allowed}
 .node-header{padding:10px 10px 8px;display:flex;align-items:center;gap:8px}
 .node-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
 .node-label{font-size:12px;font-weight:700;color:#1a1a1a;line-height:1.2}
@@ -210,6 +215,7 @@ body{background:#fff;color:#1a1a1a;font-family:'Apple SD Gothic Neo','Noto Sans 
     <span class="sep">/</span>
     <input class="agent-name-input" id="agent-name" type="text" value="My Agent 1" spellcheck="false">
     <div class="top-bar-right">
+      <button class="run-btn" id="run-btn" onclick="runScenario()">▶ 에이전트 실행</button>
       <button class="save-lib-btn" onclick="openSaveModal()">📚 라이브러리 저장</button>
     </div>
   </div>
@@ -270,6 +276,7 @@ body{background:#fff;color:#1a1a1a;font-family:'Apple SD Gothic Neo','Noto Sans 
       <button class="ftab" data-cat="소매" onclick="setFilter(this,'소매')">소매</button>
       <button class="ftab" data-cat="제조" onclick="setFilter(this,'제조')">제조</button>
       <button class="ftab" data-cat="기타" onclick="setFilter(this,'기타')">기타</button>
+      <button class="ftab" data-cat="영업지원" onclick="setFilter(this,'영업지원')">영업지원</button>
       <button class="ftab" data-cat="한국어" onclick="setFilter(this,'한국어')">한국어</button>
     </div>
   </div>
@@ -291,7 +298,7 @@ body{background:#fff;color:#1a1a1a;font-family:'Apple SD Gothic Neo','Noto Sans 
   <div class="modal">
     <h3>📚 라이브러리에 저장</h3>
     <div class="modal-field"><label class="modal-lbl">에이전트 이름</label><input class="modal-input" id="m-name" type="text"></div>
-    <div class="modal-field"><label class="modal-lbl">카테고리</label><select class="modal-sel" id="m-cat"><option>보험</option><option>물류</option><option>금융</option><option>의료</option><option>소매</option><option>제조</option><option>기타</option><option>한국어</option></select></div>
+    <div class="modal-field"><label class="modal-lbl">카테고리</label><select class="modal-sel" id="m-cat"><option>보험</option><option>물류</option><option>금융</option><option>의료</option><option>소매</option><option>제조</option><option>기타</option><option>영업지원</option><option>한국어</option></select></div>
     <div class="modal-field"><label class="modal-lbl">설명 (선택)</label><textarea class="modal-textarea" id="m-desc" placeholder="이 에이전트가 하는 일을 간단히 설명해주세요"></textarea></div>
     <div class="modal-btns">
       <button class="mbtn mbtn-cancel" onclick="closeSaveModal()">취소</button>
@@ -397,7 +404,75 @@ const FASOO_IO = {
   }
 };
 
-const CAT_COLORS = {'보험':'#3b82f6','물류':'#8b5cf6','금융':'#059669','의료':'#ef4444','소매':'#f59e0b','제조':'#6366f1','기타':'#64748b','한국어':'#ec4899'};
+const CAT_COLORS = {'보험':'#3b82f6','물류':'#8b5cf6','금융':'#059669','의료':'#ef4444','소매':'#f59e0b','제조':'#6366f1','기타':'#64748b','영업지원':'#f97316','한국어':'#ec4899'};
+
+// ══ 인바운드 고객 맞춤 이메일 에이전트 I/O (의료기기 리브스메드 시나리오) ══
+const INBOUND_IO = {
+  extract:{
+    i:[
+      {l:'입력 소스',t:'sel',o:['인바운드 레포트 (Excel)','Outlook 첨부파일','수동 입력'],v:'인바운드 레포트 (Excel)'},
+      {l:'대상 파일',t:'txt',p:'',v:'[의료기기] 리브스메드_인바운드레포트.xlsx'},
+      {l:'추출 항목',t:'tags',o:['고객사명','담당자','사용자수','관심제품','현재환경','대응현황'],a:['고객사명','담당자','사용자수','관심제품','현재환경','대응현황']}
+    ],
+    o:[
+      {l:'고객사',t:'result',v:'리브스메드(주) — KOSDAQ 상장 (2025.12.24), 의료기기 제조'},
+      {l:'담당자',t:'result',v:'서진 과장 (경영지원실) | 사용자 400명'},
+      {l:'관심 제품',t:'result',v:'FED-N, FXM, Wrapsody eCo, FSS, AI-R DLP'},
+      {l:'현재 환경',t:'result',v:'IDC 기반, 더존 아마란스10, 서버실 없음'},
+      {l:'대응 현황',t:'result',v:'3차 대응 완료 — GA견적 + 제안서 요청'}
+    ]
+  },
+  classify:{
+    i:[
+      {l:'분류 기준',t:'sel',o:['AI 자동 분류','규칙 기반','혼합 방식'],v:'AI 자동 분류'},
+      {l:'산업군 후보',t:'tags',o:['의료기기','제조','IT/SW','금융','공공기관'],a:['의료기기','제조','IT/SW','금융','공공기관']},
+      {l:'신뢰도 임계값',t:'sel',o:['90% 이상','80% 이상','70% 이상'],v:'90% 이상'}
+    ],
+    o:[
+      {l:'분류 결과',t:'result',v:'✅ 의료기기 (신뢰도 97%)'},
+      {l:'분류 근거',t:'result',v:'KOSDAQ 상장 의료기기 제조사 · CAD 도면 보안 니즈 · 외부 배포 문서 통제 필요'},
+      {l:'적용 프롬프트',t:'result',v:'의료기기 산업 Pain Point + 파수 CAD 보안 솔루션 컨텍스트 로드'}
+    ]
+  },
+  meta:{
+    i:[
+      {l:'검색 소스 A (병렬)',t:'sel',o:['fasoo.ai/event/upcoming','fasoo.ai/newsletter','fasoo.ai/insight'],v:'fasoo.ai/event/upcoming'},
+      {l:'검색 소스 B (병렬)',t:'sel',o:['제품 DB','fasoo.ai/solutions'],v:'fasoo.ai/solutions'},
+      {l:'처리 방식',t:'sel',o:['병렬 실행 (A+B 동시)','순차 실행'],v:'병렬 실행 (A+B 동시)'}
+    ],
+    o:[
+      {l:'관련 솔루션 페이지',t:'result',v:'CAD 파일 보안 솔루션 — fasoo.ai/solutions/cad-file-security-solution'},
+      {l:'매핑 제품 ①',t:'result',v:'FED-N — 외부 배포 문서 암호화 · 열람 권한 만료 제어'},
+      {l:'매핑 제품 ②',t:'result',v:'AI-R DLP — 비정형 데이터 유출 방지 · CAD 도면 파일 포함'},
+      {l:'매핑 제품 ③',t:'result',v:'Wrapsody eCo — IDC 환경 협력업체 문서 공유 보안'}
+    ]
+  },
+  workflow:{
+    i:[
+      {l:'LLM 선택',t:'sel',o:['ELLM (사내)','외부 LLM (GPT-4)','외부 LLM (Claude)'],v:'ELLM (사내)'},
+      {l:'이메일 구성',t:'tags',o:['① 고객 문제 컨텍스트','② 산업 Pain Point','③ 파수 솔루션·이벤트'],a:['① 고객 문제 컨텍스트','② 산업 Pain Point','③ 파수 솔루션·이벤트']},
+      {l:'수신자',t:'txt',p:'',v:'서진 과장 <sj@livsmede.co.kr>'}
+    ],
+    o:[
+      {l:'이메일 제목',t:'result',v:'[파수] 리브스메드 의료기기 도면 보안 — FED-N·AI-R DLP 제안 안내'},
+      {l:'본문 ①',t:'result',v:'고객 컨텍스트: 3차 대응 후속 · IDC 기반 문서 외부 배포 리스크 언급'},
+      {l:'본문 ②',t:'result',v:'산업 동향: 의료기기 CAD 도면 · 임상 데이터 유출 사고 증가 (2024~2025)'},
+      {l:'본문 ③',t:'result',v:'파수 솔루션: CAD 파일 보안 솔루션 링크 포함 (fasoo.ai/solutions/cad-file-security-solution)'}
+    ]
+  },
+  notify:{
+    i:[
+      {l:'품질 검토 항목',t:'tags',o:['개인화 여부','제품 연관성','링크 유효성','어조 검토'],a:['개인화 여부','제품 연관성','링크 유효성','어조 검토']},
+      {l:'전달 방식',t:'sel',o:['Outlook 초안함 저장','바로 발송','담당자 검토 후 발송'],v:'Outlook 초안함 저장'},
+      {l:'알림',t:'sel',o:['없음','Outlook 알림','이메일'],v:'Outlook 알림'}
+    ],
+    o:[
+      {l:'품질 검토 결과',t:'result',v:'✅ 통과 — 개인화 확인 · 제품 링크 유효 · 어조 적절'},
+      {l:'처리 상태',t:'result',v:'✅ Outlook 초안함 저장 완료 · 담당자 검토 대기'},
+      {l:'소요 시간',t:'result',v:'⏱️ 총 처리 시간: 23초 (기존 20분 → 목표 5분 이내 달성)'}
+    ]
+  }
+};
 
 // ══ VIEW ══
 function showView(name) {
@@ -533,6 +608,7 @@ function renderIO(id) {
   const c = COMP[node.type];
   let def;
   if (node.scenario === 'fasoo') def = FASOO_IO[node.type];
+  else if (node.scenario === 'inbound') def = INBOUND_IO[node.type];
   else if (node.scenario === true) def = SCENARIO_IO[node.type];
   else def = IO[node.type];
 
@@ -591,6 +667,104 @@ function loadAgentInBuilder(id) {
     }
     drawConns();
   }, 80);
+}
+
+// ══ 에이전트 실행 (각본 모드) ══
+function runScenario() {
+  if (nodes.length === 0) { showToast('⚠️ 실행할 에이전트가 없습니다. 라이브러리에서 불러오세요.'); return; }
+  const btn = document.getElementById('run-btn');
+  if (btn.disabled) return;
+  btn.disabled = true;
+  btn.textContent = '⏳ 실행 중...';
+
+  const stepLabels = [
+    '📄 인바운드 레포트 파싱 중...',
+    '🗂️ 산업군 자동 분류 중...',
+    '🔍 컨텐츠 · 제품 병렬 매핑 중...',
+    '✉️ ELLM 이메일 초안 생성 중...',
+    '✅ 품질 검토 · Outlook 초안함 저장 중...'
+  ];
+
+  let i = 0;
+  function step() {
+    nodes.forEach(n => document.getElementById('node-' + n.id)?.classList.remove('node-running'));
+    if (i >= nodes.length) {
+      btn.disabled = false;
+      btn.textContent = '▶ 에이전트 실행';
+      showToast('✅ 완료 — 이메일 초안 다운로드 중...');
+      setTimeout(downloadDraft, 600);
+      return;
+    }
+    const node = nodes[i];
+    document.getElementById('node-' + node.id)?.classList.add('node-running');
+    selectNode(node.id);
+    showToast(stepLabels[i] || '처리 중...');
+    i++;
+    setTimeout(step, 2500);
+  }
+  step();
+}
+
+// ══ 이메일 초안 다운로드 ══
+function downloadDraft() {
+  const today = new Date().toLocaleString('ko-KR');
+  const filename = '이메일초안_리브스메드_' + new Date().toLocaleDateString('ko-KR').replace(/\. /g,'').replace('.','') + '.txt';
+  const draft =
+`수신: 서진 과장 <sj@livsmede.co.kr>
+제목: [파수] 리브스메드 의료기기 도면 보안 — FED-N·AI-R DLP 제안 안내
+발신: 파수 사업전략팀
+생성일시: ${today}
+${'─'.repeat(52)}
+
+서진 과장님,
+
+안녕하세요. 파수 사업전략팀입니다.
+지난 3차 미팅 및 GA견적 검토 이후 연락드립니다.
+
+■ 고객 현황
+
+리브스메드는 IDC 기반 환경(더존 아마란스10)에서 400명 규모로 운영 중이시며,
+외부 협력업체와의 CAD 도면 및 임상 데이터 공유 과정에서
+문서 접근 권한 통제와 유출 방지의 필요성이 높아지고 있습니다.
+
+■ 산업 동향
+
+2024~2025년 의료기기 업계에서 CAD 도면 및 임상 데이터 유출 사고가
+지속 증가하고 있습니다. 특히 KOSDAQ 상장사의 경우, 내부 정보 유출은
+공시 의무와 직결되어 더욱 엄격한 보안 관리가 요구됩니다.
+
+■ 파수 제안 솔루션
+
+• FED-N
+  외부 배포 문서에 암호화를 적용하고 열람 권한 만료일을 설정하여,
+  협력업체 공유 이후에도 문서 접근을 통제할 수 있습니다.
+
+• AI-R DLP
+  CAD 도면을 포함한 비정형 데이터의 유출을 실시간으로 탐지·차단합니다.
+
+• Wrapsody eCo
+  IDC 환경에서 협력업체와 안전하게 문서를 공유할 수 있는 솔루션입니다.
+
+파수 CAD 파일 보안 솔루션 상세:
+https://www.fasoo.ai/solutions/cad-file-security-solution
+
+추가 문의사항이 있으시면 언제든 연락 주십시오.
+
+감사합니다.
+파수 사업전략팀 드림
+
+${'─'.repeat(52)}
+* 본 초안은 파수 AI 인바운드 이메일 에이전트가 자동 생성하였습니다.
+* 발송 전 내용을 검토하신 후 수정하여 활용해 주시기 바랍니다.`;
+
+  const blob = new Blob([draft], {type: 'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('📄 초안 다운로드 완료 — ' + filename);
 }
 
 // ══ SAVE ══
@@ -683,6 +857,27 @@ function initSampleAgents() {
   const lib = JSON.parse(localStorage.getItem('wab_library') || '[]');
   const today = new Date().toLocaleDateString('ko-KR');
   let changed = false;
+
+  // 0. 인바운드 고객 맞춤 이메일 에이전트 (제일 앞)
+  if (!lib.find(a => a.id === 'sample_inbound_email')) {
+    lib.unshift({
+      id: 'sample_inbound_email',
+      name: '인바운드 고객 맞춤 이메일 에이전트',
+      category: '영업지원',
+      description: '인바운드 레포트(Excel)를 받으면 산업군 자동 분류 → 컨텐츠·제품 병렬 매핑 → ELLM 이메일 초안 생성 → 품질 검토 후 Outlook 초안함 저장까지 자동 처리. 20분 → 5분 이내 목표. (데모: 의료기기 리브스메드 시나리오)',
+      components: ['extract','classify','meta','workflow','notify'],
+      nodes:[
+        {id:1,type:'extract', x:60,  y:90, scenario:'inbound'},
+        {id:2,type:'classify',x:250, y:90, scenario:'inbound'},
+        {id:3,type:'meta',    x:440, y:90, scenario:'inbound'},
+        {id:4,type:'workflow',x:630, y:90, scenario:'inbound'},
+        {id:5,type:'notify',  x:820, y:90, scenario:'inbound'},
+      ],
+      connections:[{f:1,t:2},{f:2,t:3},{f:3,t:4},{f:4,t:5}],
+      nodeCounter:5, createdAt:today
+    });
+    changed = true;
+  }
 
   // 1. 파수AI 1Q2026 실제 분석 (맨 앞)
   if (!lib.find(a => a.id === 'sample_fasoo_1q2026')) {
